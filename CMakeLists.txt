@@ -1,73 +1,71 @@
-cmake_minimum_required(VERSION 2.8.3)
-project(fiesta)
+cmake_minimum_required(VERSION 3.8)
+project(fiesta_pkg)
 
-find_package(catkin REQUIRED COMPONENTS
-        roscpp
-        std_msgs
-        nav_msgs
-        visualization_msgs
-        tf
-        cv_bridge
-        )
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic -O3)
+endif()
 
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(visualization_msgs REQUIRED)
+find_package(PCL REQUIRED)
+find_package(pcl_conversions REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(cv_bridge REQUIRED)
 find_package(Eigen3 REQUIRED)
-find_package(PCL 1.7 REQUIRED)
 find_package(OpenCV REQUIRED)
-set(Eigen3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
+find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
-catkin_package(
-  INCLUDE_DIRS include
+
+add_executable(fiesta src/fiesta.cpp
+                      src/parameters.cpp
+                      src/timing.cc
+                      src/raycast.cpp
+                      src/ESDFMap.cpp)
+target_include_directories(fiesta PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+target_compile_features(fiesta PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+ament_target_dependencies(
+  fiesta
+  "rclcpp"
+  "visualization_msgs"
+  "PCL"
+  "std_msgs"
+  "nav_msgs"
+  "tf2"
+  "tf2_ros"
+  "cv_bridge"
+  "Eigen3"
+  "OpenCV"
+  "sensor_msgs"
+  "geometry_msgs"
+  "pcl_conversions"
+)
+target_link_libraries(fiesta ${PCL_LIBRARIES})
+
+install(TARGETS fiesta
+  DESTINATION lib/${PROJECT_NAME})
+
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}/
 )
 
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  # the following line skips the linter which checks for copyrights
+  # comment the line when a copyright and license is added to all source files
+  set(ament_cmake_copyright_FOUND TRUE)
+  # the following line skips cpplint (only works in a git repo)
+  # comment the line when this package is in a git repo and when
+  # a copyright and license is added to all source files
+  set(ament_cmake_cpplint_FOUND TRUE)
+  ament_lint_auto_find_test_dependencies()
+endif()
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
-
-include_directories(
-    include
-    SYSTEM
-    ${catkin_INCLUDE_DIRS}
-    ${Eigen3_INCLUDE_DIRS}
-    ${PCL_INCLUDE_DIRS}
-    ${OpenCV_INCLUDE_DIRS}
-)
-
-link_directories(${PCL_LIBRARY_DIRS})
-
-set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS} -O3 -Wall -pthread") # -Wextra -Werror
-set(CMAKE_BUILD_TYPE "RELEASE")
-#add_executable(test_esdf_map
-#        include/ESDFMap.h
-#        src/ESDFMap.cpp
-#        include/timing.h
-#        src/timing.cc
-#        test/test_ESDF_Map.cpp
-#        )
-#target_link_libraries(test_esdf_map
-#        ${catkin_LIBRARIES}
-#        )
-#FIND_PACKAGE( OpenMP REQUIRED)
-#if(OPENMP_FOUND)
-#message("OPENMP FOUND")
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-#endif()
-
-add_executable(test_fiesta
-        include/parameters.h
-        src/parameters.cpp
-        include/timing.h
-        src/timing.cc
-        include/raycast.h
-        src/raycast.cpp
-        include/ESDFMap.h
-        src/ESDFMap.cpp
-        include/Fiesta.h
-        test/test_fiesta.cpp
-        )
-target_link_libraries(test_fiesta
-        ${catkin_LIBRARIES}
-        ${PCL_LIBRARIES}
-        ${OpenCV_LIBS}
-        )
-
+ament_package()

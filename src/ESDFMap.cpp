@@ -1,8 +1,9 @@
 //
 // Created by tommy on 12/17/18.
 //
+// Edited amkulk@udel.edu 
 
-#include "ESDFMap.h"
+#include "fiesta_pkg/ESDFMap.h"
 #include <math.h>
 #include <time.h>
 
@@ -541,7 +542,7 @@ double fiesta::ESDFMap::GetDistWithGradTrilinear(Eigen::Vector3d pos,
 
 // region VISUALIZATION
 
-void fiesta::ESDFMap::GetPointCloud(sensor_msgs::PointCloud &m, int vis_lower_bound, int vis_upper_bound) {
+void fiesta::ESDFMap::GetPointCloud(sensor_msgs::msg::PointCloud &m, int vis_lower_bound, int vis_upper_bound) {
   m.header.frame_id = "world";
   m.points.clear();
 #ifdef HASH_TABLE
@@ -554,7 +555,7 @@ void fiesta::ESDFMap::GetPointCloud(sensor_msgs::PointCloud &m, int vis_lower_bo
     Eigen::Vector3d pos;
     Vox2Pos(Eigen::Vector3i(vox_buffer_[i]), pos);
 
-    geometry_msgs::Point32 p;
+    geometry_msgs::msg::Point32 p;
     p.x = pos(0);
     p.y = pos(1);
     p.z = pos(2);
@@ -571,7 +572,7 @@ void fiesta::ESDFMap::GetPointCloud(sensor_msgs::PointCloud &m, int vis_lower_bo
         Eigen::Vector3d pos;
         Vox2Pos(Eigen::Vector3i(x, y, z), pos);
 
-        geometry_msgs::Point32 p;
+        geometry_msgs::msg::Point32 p;
         p.x = pos(0);
         p.y = pos(1);
         p.z = pos(2);
@@ -581,8 +582,8 @@ void fiesta::ESDFMap::GetPointCloud(sensor_msgs::PointCloud &m, int vis_lower_bo
 #endif
 }
 
-inline std_msgs::ColorRGBA RainbowColorMap(double h) {
-  std_msgs::ColorRGBA color;
+inline std_msgs::msg::ColorRGBA RainbowColorMap(double h) {
+  std_msgs::msg::ColorRGBA color;
   color.a = 1;
   // blend over HSV-values (more colors)
 
@@ -636,12 +637,12 @@ inline std_msgs::ColorRGBA RainbowColorMap(double h) {
   return color;
 }
 
-void fiesta::ESDFMap::GetSliceMarker(visualization_msgs::Marker &m, int slice, int id,
+void fiesta::ESDFMap::GetSliceMarker(visualization_msgs::msg::Marker &m, int slice, int id,
                                      Eigen::Vector4d color, double max_dist) {
   m.header.frame_id = "world";
   m.id = id;
-  m.type = visualization_msgs::Marker::POINTS;
-  m.action = visualization_msgs::Marker::MODIFY;
+  m.type = visualization_msgs::msg::Marker::POINTS;
+  m.action = visualization_msgs::msg::Marker::MODIFY;
   m.scale.x = resolution_;
   m.scale.y = resolution_;
   m.scale.z = resolution_;
@@ -653,7 +654,7 @@ void fiesta::ESDFMap::GetSliceMarker(visualization_msgs::Marker &m, int slice, i
   m.points.clear();
   m.colors.clear();
   // iterate the map
-  std_msgs::ColorRGBA c;
+  std_msgs::msg::ColorRGBA c;
 #ifdef HASH_TABLE
   // TODO: low performance, need to be modified, which is also easy
   for (int i = 1; i < count; i++) {
@@ -666,7 +667,7 @@ void fiesta::ESDFMap::GetSliceMarker(visualization_msgs::Marker &m, int slice, i
     Eigen::Vector3d pos;
     Vox2Pos(Eigen::Vector3i(vox_buffer_[i]), pos);
 
-    geometry_msgs::Point p;
+    geometry_msgs::msg::Point p;
     p.x = pos(0);
     p.y = pos(1);
     p.z = pos(2);
@@ -685,7 +686,7 @@ void fiesta::ESDFMap::GetSliceMarker(visualization_msgs::Marker &m, int slice, i
       Eigen::Vector3d pos;
       Vox2Pos(vox, pos);
 
-      geometry_msgs::Point p;
+      geometry_msgs::msg::Point p;
       p.x = pos(0);
       p.y = pos(1);
       p.z = pos(2);
